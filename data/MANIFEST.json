@@ -1,0 +1,37 @@
+{
+  "spec": "DATA-INFRA-005",
+  "extracted_utc": "2026-10-18T17:41:13+00:00",
+  "pit_db_bytes_at_extract": 1839747072,
+  "window": {
+    "start_inclusive": "2026-08-10",
+    "end_exclusive": "2026-08-13",
+    "days": 3
+  },
+  "tokens": [
+    "5615282760875985231868508008056959876238536896643315063916840237042205273721",
+    "97050921740416192996389806693742575608111328819185493163189880975611314813724",
+    "29633826701713552120011280893309822625942861174174976276686142480636225243753",
+    "35198549486569600595408965368290795524428922595732253580266052028158040373233"
+  ],
+  "sql": {
+    "obs": "SELECT symbol, field, event_time, knowledge_time, value\nFROM observations\nWHERE source = 'polymarket-clob'\n  AND symbol IN ({ph})\n  AND event_time >= ? AND event_time < ?\nORDER BY symbol, event_time, field",
+    "snapshots": "SELECT doc_id, symbol, event_time, knowledge_time, ref, meta_json\nFROM documents\nWHERE source = 'polymarket-clob' AND doc_type = 'book_snapshot'\n  AND symbol IN ({ph})\n  AND event_time >= ? AND event_time < ?\nORDER BY symbol, event_time",
+    "heartbeats": "SELECT doc_id, event_time, knowledge_time, meta_json\nFROM documents\nWHERE source = 'polymarket-capture-meta' AND doc_type = 'poll_attempt'\n  AND event_time >= ? AND event_time < ?\nORDER BY event_time"
+  },
+  "row_counts": {
+    "obs.csv": 67500,
+    "snapshots.jsonl": 1350,
+    "heartbeats.csv": 394
+  },
+  "sha256": {
+    "obs.csv": "bdac605ca5262fbbf4546eaf3b88ce0bb7f6eff31be8e107021769a13f06c587",
+    "snapshots.jsonl": "ae6526cb4bfb6e802a41e8a81aac7d89d63e4dc36db84862b6d5337aeac44cfb",
+    "heartbeats.csv": "27014c8fb7f932c2a13e8318acabfc72e9b0d83163ab37898e88f0514d9caf45"
+  },
+  "notes": [
+    "observations are EAV: one row per (symbol, field, event_time); 50 field names; levels 1-10 only",
+    "snapshots.jsonl carries the full untruncated ladder under meta.raw.bids / meta.raw.asks (strings)",
+    "heartbeats are global per poll round (not per token); grid begins 2026-08-04T16:53:16Z (I-048)",
+    "no trade prints exist in the store; only last_trade_price"
+  ]
+}

@@ -1,0 +1,4 @@
+doc_id,event_time,knowledge_time,ok,n_requested,n_captured,n_failed,failed_tokens,error
+1,2026-08-10T00:00:05+00:00,1786406406.0,1,2,2,0,,
+2,2026-08-10T00:15:05+00:00,1786407306.0,1,2,1,1,B,
+3,2026-08-10T00:45:05+00:00,1786409106.0,0,2,0,2,A;B,timeout
