@@ -5,3 +5,5 @@ __pycache__/
 # never commit the full store
 *.db
 *.db.gz
+kc.lic
+*.lic

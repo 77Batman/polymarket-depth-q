@@ -62,7 +62,7 @@ def row(rec: dict) -> dict:
 def main(src="data/snapshots.jsonl", dst="reference/expected_depth.csv") -> int:
     rows = [row(json.loads(line)) for line in open(src) if line.strip()]
     df = pd.DataFrame(rows).sort_values(["symbol", "event_time"]).reset_index(drop=True)
-    df.to_csv(dst, index=False, float_format="%.12g")
+    df.to_csv(dst, index=False, float_format="%.17g")
     print(f"{len(df)} snapshots -> {dst}; threshold T={NOTIONAL_T}")
     return 0
 
