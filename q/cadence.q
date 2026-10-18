@@ -1,5 +1,7 @@
 / cadence.q — data-quality layer (acceptance #5): classify every 900 s slot x token.
-/ Classes: captured / one_sided / empty / attempted_failed / not_attempted, plus ambiguous for slots before HB0 (I-048).
+/ Classes: captured / one_sided / empty / attempted_failed / not_attempted / captured_unchanged, plus ambiguous for slots before HB0 (I-048).
+/ captured_unchanged: the heartbeat says the round ran and the token was captured, but no new snapshot exists — the store
+/ deduplicates on the venue's book timestamp (loaders.py: ref = token:venue_timestamp), so an unchanged book writes nothing.
 \l q/load.q
 \d .pdq
 
@@ -25,7 +27,7 @@ cadence:{[hb;snaps;tokens;t0;t1]
        ?[r[`hasHb]&(not 1b^r`ok) or 0b^r`ftok;       `attempted_failed;
        ?[(not r`hasHb)&r[`slot]<.pdq.HB0;                 `ambiguous;
        ?[not r`hasHb;                                `not_attempted;
-                                                     `attempted_failed]]]]]];
+                                                     `captured_unchanged]]]]]];   / hb ok, token not failed, no new doc: book unchanged (dedup)
   select slot,token,class from update class:cls from r}
 
 / cadenceReport[c] -> class -> n

@@ -26,8 +26,8 @@ t["util: iso parses without fraction";            {assert[2026.08.31D23:21:35.00
 t["load: loadObs returns 32 typed rows";          {o:.pdq.loadObs "tests/fixtures/obs_small.csv"; assert[32=count o;"count"]; assert[`token`field`time`ktime`val~cols o;"cols"]; assert[12h=type o`time;"time type"]}]
 t["load: scalars has one row per snapshot";       {s:.pdq.scalars .pdq.loadObs "tests/fixtures/obs_small.csv"; assert[3=count s;"3 snapshots"]; assert[0.475=first exec mid from s where token=`A,time=2026.08.10D00:00:30;"mid A"]; assert[null first exec mid from s where token=`A,time=2026.08.10D00:15:30;"mid one-sided is null"]}]
 t["load: book unpivots l1..l10";                  {b:.pdq.book .pdq.loadObs "tests/fixtures/obs_small.csv"; assert[6=count b;"3 bid + 2 ask + 1 bid rows"]; assert[`time`token`side`level~keys b;"key"]; assert[0.40=first exec price from b where token=`A,side=`bid,level=2;"bid l2 price"]}]
-t["load: loadSnapshots parses 3 raw books";       {s:.pdq.loadSnapshots "tests/fixtures/snaps_small.jsonl"; assert[3=count s;"3"]; assert[99h=type first s`raw;"raw is dict"]; assert[3=count first exec raw[;`bids] from s where token=`A;"3 bids"]}]
-t["load: loadHeartbeats parses failed_tokens";    {h:.pdq.loadHeartbeats "tests/fixtures/hb_small.csv"; assert[3=count h;"3"]; assert[(`A`B)~h[2;`failed_tokens];"failed list"]; assert[not h[2;`ok];"ok false"]}]
+t["load: loadSnapshots parses 3 raw books";       {s:.pdq.loadSnapshots "tests/fixtures/snaps_small.jsonl"; assert[3=count s;"3 rows"]; assert[99h=type first s`raw;"raw is dict"]; assert[3=count first exec raw[;`bids] from s where token=`A;"3 bids"]}]
+t["load: loadHeartbeats parses failed_tokens";    {h:.pdq.loadHeartbeats "tests/fixtures/hb_small.csv"; assert[4=count h;"4 rows"]; assert[(`A`B)~h[2;`failed_tokens];"failed list"]; assert[not h[2;`ok];"ok false"]}]
 
 / ---------------------------------------------------------------- 2. ladder + reconciliation (acceptance #2)
 t["ladder: sorted bids desc / asks asc, 1-based levels"; {l:.pdq.ladder .pdq.loadSnapshots "tests/fixtures/snaps_small.jsonl"; assert[6=count l;"6 levels"]; assert[0.45 0.40 0.30~exec price from l where token=`A,side=`bid,time=2026.08.10D00:00:30;"bid order"]; assert[1 2~exec level from l where token=`A,side=`ask,time=2026.08.10D00:00:30;"ask levels"]}]
@@ -40,10 +40,10 @@ t["depth: fixture values";                        {d:.pdq.depth .pdq.loadSnapsho
 
 / ---------------------------------------------------------------- 4. cadence (acceptance #5) on fixtures
 t["cadence: slots on the 900 s grid";             {s:.pdq.slots[2026.08.10D00:00:05;2026.08.10D00:45:05]; assert[4=count s;"4 slots"]; assert[2026.08.10D00:15:00=s 1;"second slot"]}]
-t["cadence: five classes on fixtures";            {h:.pdq.loadHeartbeats "tests/fixtures/hb_small.csv"; s:.pdq.loadSnapshots "tests/fixtures/snaps_small.jsonl";
-   c:.pdq.cadence[h;s;`A`B;2026.08.10D00:00;2026.08.10D00:45]; r:.pdq.cadenceReport c;
-   assert[8=count c;"4 slots x 2 tokens"]; assert[1=r[`captured]`n;"captured"]; assert[1=r[`one_sided]`n;"one_sided"]; assert[1=r[`empty]`n;"empty"];
-   assert[3=r[`attempted_failed]`n;"attempted_failed"]; assert[2=r[`not_attempted]`n;"not_attempted"]; assert[0=0^r[`ambiguous]`n;"ambiguous 0"]}]
+t["cadence: six classes on fixtures";             {h:.pdq.loadHeartbeats "tests/fixtures/hb_small.csv"; s:.pdq.loadSnapshots "tests/fixtures/snaps_small.jsonl";
+   c:.pdq.cadence[h;s;`A`B;2026.08.10D00:00;2026.08.10D01:00]; r:.pdq.cadenceReport c;
+   assert[10=count c;"5 slots x 2 tokens"]; assert[1=r[`captured]`n;"captured"]; assert[1=r[`one_sided]`n;"one_sided"]; assert[1=r[`empty]`n;"empty"];
+   assert[3=r[`attempted_failed]`n;"attempted_failed"]; assert[2=r[`not_attempted]`n;"not_attempted"]; assert[2=r[`captured_unchanged]`n;"captured_unchanged"]; assert[0=0^r[`ambiguous]`n;"ambiguous 0"]}]
 t["cadence: pre-HB0 slots are ambiguous, never imputed"; {c:.pdq.cadence[0#.pdq.loadHeartbeats "tests/fixtures/hb_small.csv";0#.pdq.loadSnapshots "tests/fixtures/snaps_small.jsonl";`A`B;2026.08.04D16:00;2026.08.04D17:00];
    r:.pdq.cadenceReport c; assert[8=r[`ambiguous]`n;"8 ambiguous"]; assert[2=r[`not_attempted]`n;"2 not_attempted after HB0"]}]
 

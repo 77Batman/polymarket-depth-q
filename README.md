@@ -21,7 +21,7 @@ reference. The point is not the metrics — it is whether two implementations ag
 | `q/load.q` | Loads the extract; **unpivots** the long-form (entity–attribute–value) scalar store into a keyed `book` table `(time;token;side;level)`. |
 | `q/ladder.q` | Builds the full-depth ladder from the raw JSON and reconciles it with the stored scalars. |
 | `q/depth.q` | Descriptive depth metrics: cumulative size/notional at 1/5/10/all levels, levels and price to a $1,000 notional, L1 and L1–5 imbalance. |
-| `q/cadence.q` | Data-quality layer: classifies every 900 s slot × token as captured / one-sided / empty / attempted-failed / not-attempted, with the pre-heartbeat window marked *ambiguous*. |
+| `q/cadence.q` | Data-quality layer: classifies every 900 s slot × token as captured / captured-unchanged / one-sided / empty / attempted-failed / not-attempted, with the pre-heartbeat window marked *ambiguous*. |
 | `reference/pandas_ref.py` | Independent pandas implementation of the same metric contract. |
 | `q/report.q` | Prints the reconciliation and cadence numbers below. `q q/report.q` |
 | `tests/run.q` | Red-first tests: fixtures first, then the real sample. `q tests/run.q` |
@@ -50,14 +50,18 @@ costs nothing for that metric — a fact about the sample, not a property of the
 | class | n |
 |---|---:|
 | captured (two-sided snapshot in slot) | 1,132 |
-| attempted_failed (heartbeat says the round ran; no snapshot for the token) | 8 |
+| captured_unchanged (heartbeat says the token was captured; no new snapshot because the book had not changed) | 8 |
 | not_attempted (no heartbeat in the slot) | 12 |
+| attempted_failed (heartbeat reports the round or the token failed) | 0 |
 | one_sided / empty | 0 |
 | ambiguous (slot before the first heartbeat, 2026-08-04 16:53 UTC) | 0 — the window starts after it |
 
-A slot is *not_attempted* only when there is no heartbeat at all; a missing snapshot with a heartbeat present is
-*attempted_failed*. The two are kept apart on purpose: one is the capture job not running, the other is the venue or
-the network. Slots before the first heartbeat can't be told apart and are labelled ambiguous rather than guessed.
+The classes are kept apart because they mean different things: *not_attempted* is the capture job not running;
+*attempted_failed* is the venue or the network; *captured_unchanged* is neither — the store deduplicates snapshots on
+the venue's own book timestamp, so a book that has not moved since the previous poll writes no new document. The first
+version of this classifier labelled those 8 as failures. Reading the heartbeats (all 394 report ok, 20 of 20 captured,
+0 failed) against the capture code showed the real cause, and the class was added. Slots before the first heartbeat
+can't be told apart and are labelled ambiguous rather than guessed.
 
 ## What was NOT verified
 
