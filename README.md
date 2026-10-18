@@ -66,7 +66,7 @@ the network. Slots before the first heartbeat can't be told apart and are labell
 - The store has **no trade prints** — only `last_trade_price` per snapshot. Nothing here joins trades.
 - No statistic in this repo relates a book feature to a later outcome. That is deliberate: such a number would be
   an unregistered backtest, and the research process this data belongs to registers hypotheses before computing them.
-- KDB-X 5.0 Community Edition was used. Licence: _TODO — one line stating only what you have read in the KX Community Edition License Agreement (developer.kx.com)._
+- KDB-X 5.0 Community Edition was used. From the KX Community Edition License Agreement as read on 2026-10-18: "Subject to and provided you comply with the terms of the Agreement, we hereby grant to you a limited, non-transferable, non-exclusive license, without right of sublicense, for the applicable License Period to install and execute the Software in executable code form for use by you solely for the Permitted Use and subject to the [Usage Restrictions](https://docs.kx.com/product/licensing/usage-restrictions.htm)." This repo contains no KX software — only q source and data — and was built for personal learning.
 - No performance claims. At this data size SQLite + pandas is perfectly adequate; q was chosen to learn q.
 - Only the committed window was checked. The full store (≈3.8 M scalar rows, 91 k snapshots as of October 2026) was not.
 
