@@ -63,6 +63,13 @@ version of this classifier labelled those 8 as failures. Reading the heartbeats 
 0 failed) against the capture code showed the real cause, and the class was added. Slots before the first heartbeat
 can't be told apart and are labelled ambiguous rather than guessed.
 
+**Two capture hosts.** The store merges heartbeats and snapshots from two capture hosts (a VPS and a laptop), and the
+sample carries no host field, so the table above is their combined wall-clock grid, not a measure of either host's
+health. Both pollers cycle slightly slower than 900 s (median heartbeat gaps of 902.7 s and 920.0 s in this window), so
+a few *not_attempted* slots are grid drift — a 900 s bucket that neither poller's cycle happened to land in — rather
+than outages. A per-host cadence needs a host field written at capture; the capture gained one after this sample was
+taken, so it is out of scope here.
+
 ## What was NOT verified
 
 - The stored scalar fields stop at **10 levels**; anything derived from them is labelled truncated. Only the
@@ -72,6 +79,8 @@ can't be told apart and are labelled ambiguous rather than guessed.
   an unregistered backtest, and the research process this data belongs to registers hypotheses before computing them.
 - KDB-X 5.0 Community Edition was used. From the KX Community Edition License Agreement as read on 2026-10-18: "Subject to and provided you comply with the terms of the Agreement, we hereby grant to you a limited, non-transferable, non-exclusive license, without right of sublicense, for the applicable License Period to install and execute the Software in executable code form for use by you solely for the Permitted Use and subject to the [Usage Restrictions](https://docs.kx.com/product/licensing/usage-restrictions.htm)." This repo contains no KX software — only q source and data — and was built for personal learning.
 - No performance claims. At this data size SQLite + pandas is perfectly adequate; q was chosen to learn q.
+- Per-host cadence. Heartbeats from two capture hosts are merged in the store and the sample has no host field, so
+  cadence is reported for the combined stream only.
 - Only the committed window was checked. The full store (≈3.8 M scalar rows, 91 k snapshots as of October 2026) was not.
 
 ## Reproduce
