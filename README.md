@@ -57,7 +57,7 @@ costs nothing for that metric — a fact about the sample, not a property of the
 | ambiguous (slot before the first heartbeat, 2026-08-04 16:53 UTC) | 0 — the window starts after it |
 
 The classes are kept apart because they mean different things: *not_attempted* is the capture job not running;
-*attempted_failed* is the venue or the network; *captured_unchanged* is neither — the store deduplicates snapshots on
+*attempted_failed* is a round or token the capture recorded as failed (the heartbeat says that it failed, not why); *captured_unchanged* is neither — the store deduplicates snapshots on
 the venue's own book timestamp, so a book that has not moved since the previous poll writes no new document. The first
 version of this classifier labelled those 8 as failures. Reading the heartbeats (all 394 report ok, 20 of 20 captured,
 0 failed) against the capture code showed the real cause, and the class was added. Slots before the first heartbeat
@@ -81,7 +81,7 @@ taken, so it is out of scope here.
 - No performance claims. At this data size SQLite + pandas is perfectly adequate; q was chosen to learn q.
 - Per-host cadence. Heartbeats from two capture hosts are merged in the store and the sample has no host field, so
   cadence is reported for the combined stream only.
-- Only the committed window was checked. The full store (≈3.8 M scalar rows, 91 k snapshots as of October 2026) was not.
+- Only the committed window was checked. The full store (≈3.8 M scalar rows, 91 k snapshots as of 2026-10-18, before a merge) was not.
 
 ## Reproduce
 
